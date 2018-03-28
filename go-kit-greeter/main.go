@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	"errors"
+	// "errors"
 	proto "github.com/antklim/go-microservices/go-kit-greeter/proto"
 	"github.com/go-kit/kit/endpoint"
-	"strings"
+	// "strings"
 )
 
 type Greeter interface {
@@ -22,7 +22,7 @@ func (g *greeterService) Hello(ctx context.Context, in *proto.HelloRequest) (str
 func makeHelloEndpoint(svc Greeter) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(proto.HelloRequest)
-		greeting, err := svc.Hello(ctx, req)
+		greeting, err := svc.Hello(ctx, &req)
 		if err != nil {
 			return proto.HelloResponse{}, err
 		}
@@ -32,4 +32,6 @@ func makeHelloEndpoint(svc Greeter) endpoint.Endpoint {
 
 func main() {
 	svc := greeterService{}
+	helloEndpoint := makeHelloEndpoint(&svc)
+	helloEndpoint()
 }
