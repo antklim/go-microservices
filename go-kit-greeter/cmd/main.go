@@ -2,10 +2,13 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	gokitgreeter "github.com/antklim/go-microservices/go-kit-greeter"
 	"github.com/go-kit/kit/log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -32,6 +35,16 @@ func main() {
 	}
 
 	errs := make(chan error)
+	go func() {
+		c := make(chan os.Signal)
+		signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+		errs <- fmt.Errorf("%s", <-c)
+	}()
+
+	go func() {
+		logger.Log("trasport", "HTTP", "addr", *httpAddr)
+		errs <- http.ListenAndServe(*httpAddr, h)
+	}()
 
 	logger.Log("exit", <-errs)
 }
