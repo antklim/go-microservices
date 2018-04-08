@@ -24,3 +24,7 @@ func (s *greeterService) GetGreeting(ctx context.Context, name string) (string, 
 	greeting := "GO-KIT Hello " + name
 	return greeting, nil
 }
+
+func NewGoKitGreeterService() Service {
+	return &greeterService{}
+}

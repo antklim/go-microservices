@@ -4,6 +4,7 @@ import (
 	"flag"
 	gokitgreeter "github.com/antklim/go-microservices/go-kit-greeter"
 	"github.com/go-kit/kit/log"
+	"net/http"
 	"os"
 )
 
@@ -20,10 +21,10 @@ func main() {
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
 
-	// var s gokitgreeter.Service
-	// {
-	// 	s = gokitgreeter.NewGoKitGreeterService()
-	// }
+	var s gokitgreeter.Service
+	{
+		s = gokitgreeter.NewGoKitGreeterService()
+	}
 
 	var h http.Handler
 	{
