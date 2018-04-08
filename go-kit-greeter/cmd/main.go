@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	gokitgreeter "github.com/antklim/go-microservices/go-kit-greeter"
 	"github.com/go-kit/kit/log"
 	"os"
 )
@@ -19,14 +20,15 @@ func main() {
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
 
-	// var s Service {
-
-	// }
-
-	// var h http.Handler
+	// var s gokitgreeter.Service
 	// {
-
+	// 	s = gokitgreeter.NewGoKitGreeterService()
 	// }
+
+	var h http.Handler
+	{
+		h = gokitgreeter.MakeHTTPHandler(s, log.With(logger, "component", "HTTP"))
+	}
 
 	errs := make(chan error)
 

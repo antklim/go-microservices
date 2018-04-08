@@ -1,6 +1,7 @@
 package gokitgreeter
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"github.com/go-kit/kit/log"
@@ -38,6 +39,7 @@ func MakeHTTPHandler(s Service, logger log.Logger) http.Handler {
 		encodeResponse,
 		options...,
 	))
+	return r
 }
 
 func decodeGetHealthRequest(_ context.Context, _ *http.Request) (interface{}, error) {
@@ -52,6 +54,10 @@ func decodeGetGreeterRequest(_ context.Context, r *http.Request) (interface{}, e
 	}
 
 	return getGreetingRequest{Name: name}, nil
+}
+
+type errorer interface {
+	error() error
 }
 
 func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
@@ -75,4 +81,13 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"error": err.Error(),
 	})
+}
+
+func codeFrom(err error) int {
+	switch err {
+	case ErrNotFound:
+		return http.StatusNotFound
+	default:
+		return http.StatusInternalServerError
+	}
 }

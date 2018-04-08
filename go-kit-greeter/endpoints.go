@@ -22,7 +22,6 @@ func MakeServiceEndpoints(s Service) Endpoints {
 
 func MakeGetHealthEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(getHealthRequest)
 		health, err := s.GetHealth(ctx)
 		return getHealthResponse{Health: health, Err: err}, nil
 	}

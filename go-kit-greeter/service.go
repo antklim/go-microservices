@@ -2,12 +2,17 @@ package gokitgreeter
 
 import (
 	"context"
+	"errors"
 )
 
 type Service interface {
 	GetHealth(ctx context.Context) (bool, error)
 	GetGreeting(ctx context.Context, name string) (string, error)
 }
+
+var (
+	ErrNotFound = errors.New("not found")
+)
 
 type greeterService struct{}
 
