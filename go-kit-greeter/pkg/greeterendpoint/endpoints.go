@@ -1,7 +1,11 @@
-package gokitgreeter
+package greeterendpoint
 
 import (
 	"context"
+
+	"github.com/go-kit/kit/log"
+
+	greeterservice "github.com/antklim/go-microservices/go-kit-greeter/pkg/greeterservice"
 	"github.com/go-kit/kit/endpoint"
 )
 
@@ -13,21 +17,37 @@ type Endpoints struct {
 	GetGreetingEndpoint endpoint.Endpoint
 }
 
-func MakeServiceEndpoints(s Service) Endpoints {
+// MakeEndpoints returns service Endoints, and wires in all the provided
+// middlewares.
+func MakeEndpoints(s greeterservice.Service, logger log.Logger) Endpoints {
+	var healthEndpoint endpoint.Endpoint
+	{
+		healthEndpoint = MakeGetHealthEndpoint(s)
+		healthEndpoint = LoggingMiddleware(log.With(logger, "method", "GetHealth"))(healthEndpoint)
+	}
+
+	var greeterEndpoint endpoint.Endpoint
+	{
+		greeterEndpoint = MakeGetGreetingEndpoint(s)
+		greeterEndpoint = LoggingMiddleware(log.With(logger, "method", "GetGreeting"))(greeterEndpoint)
+	}
+
 	return Endpoints{
-		GetHealthEndpoint:   MakeGetHealthEndpoint(s),
-		GetGreetingEndpoint: MakeGetGreetingEndpoint(s),
+		GetHealthEndpoint:   healthEndpoint,
+		GetGreetingEndpoint: greeterEndpoint,
 	}
 }
 
-func MakeGetHealthEndpoint(s Service) endpoint.Endpoint {
+// MakeGetHealthEndpoint constructs a GetHealth endpoint wrapping the service.
+func MakeGetHealthEndpoint(s greeterservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		health, err := s.GetHealth(ctx)
+		health, err := s.GetHealth()
 		return getHealthResponse{Health: health, Err: err}, nil
 	}
 }
 
-func MakeGetGreetingEndpoint(s Service) endpoint.Endpoint {
+// MakeGetGreetingEndpoint constructs a GetGreeter endpoint wrapping the service.
+func MakeGetGreetingEndpoint(s greeterservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(getGreetingRequest)
 		greeting, err := s.GetGreeting(ctx, req.Name)
