@@ -74,3 +74,7 @@ type getGreetingResponse struct {
 }
 
 func (r getGreetingResponse) error() error { return r.Err }
+
+type Failer interface {
+	Failed() error
+}
