@@ -55,6 +55,13 @@ func MakeGetGreetingEndpoint(s greeterservice.Service) endpoint.Endpoint {
 	}
 }
 
+// Failer is an interface that should be implemented by response types.
+// Response encoders can check if responses are Failer, and if so if they've
+// failed, and if so encode them using a separate write path based on the error.
+type Failer interface {
+	Failed() error
+}
+
 type getHealthRequest struct{}
 
 type getHealthResponse struct {
@@ -62,7 +69,7 @@ type getHealthResponse struct {
 	Err    error `json:"err,omitempty"`
 }
 
-func (r getHealthResponse) error() error { return r.Err }
+func (r getHealthResponse) Failed() error { return r.Err }
 
 type getGreetingRequest struct {
 	Name string
@@ -73,8 +80,4 @@ type getGreetingResponse struct {
 	Err      error  `json:"err,omitempty"`
 }
 
-func (r getGreetingResponse) error() error { return r.Err }
-
-type Failer interface {
-	Failed() error
-}
+func (r getGreetingResponse) Failed() error { return r.Err }
