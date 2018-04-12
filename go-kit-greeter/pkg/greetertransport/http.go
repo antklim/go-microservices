@@ -31,26 +31,24 @@ func NewHTTPHandler(endpoints greeterendpoint.Endpoints, logger log.Logger) http
 	))
 	m.Methods("GET").Path("/hello").Handler(httptransport.NewServer(
 		endpoints.GetGreetingEndpoint,
-		decodeGetGreeterRequest,
+		decodeHTTPGetGreeterRequest,
 		encodeHTTPGenericResponse,
 		options...,
 	))
 	return m
 }
 
-// func decodeHTTPGetHealthRequest(_ context.Context, _ *http.Request) (interface{}, error) {
-// 	return getHealthRequest{}, nil
-// }
+func decodeHTTPGetHealthRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req greeterendpoint.GetHealthRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	return req, err
+}
 
-// func decodeGetGreeterRequest(_ context.Context, r *http.Request) (interface{}, error) {
-// 	vars := mux.Vars(r)
-// 	name, ok := vars["name"]
-// 	if !ok {
-// 		return nil, ErrBadRouting
-// 	}
-
-// 	return getGreetingRequest{Name: name}, nil
-// }
+func decodeHTTPGetGreeterRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req greeterendpoint.GetGreetingRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	return req, err
+}
 
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	w.WriteHeader(err2code(err))

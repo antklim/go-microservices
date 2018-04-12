@@ -42,16 +42,16 @@ func MakeEndpoints(s greeterservice.Service, logger log.Logger) Endpoints {
 func MakeGetHealthEndpoint(s greeterservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		health, err := s.GetHealth()
-		return getHealthResponse{Health: health, Err: err}, nil
+		return GetHealthResponse{Health: health, Err: err}, nil
 	}
 }
 
 // MakeGetGreetingEndpoint constructs a GetGreeter endpoint wrapping the service.
 func MakeGetGreetingEndpoint(s greeterservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(getGreetingRequest)
+		req := request.(GetGreetingRequest)
 		greeting, err := s.GetGreeting(ctx, req.Name)
-		return getGreetingResponse{Greeting: greeting, Err: err}, nil
+		return GetGreetingResponse{Greeting: greeting, Err: err}, nil
 	}
 }
 
@@ -62,22 +62,28 @@ type Failer interface {
 	Failed() error
 }
 
-type getHealthRequest struct{}
+// GetHealthRequest collects the request parameters for the GetHealth method.
+type GetHealthRequest struct{}
 
-type getHealthResponse struct {
+// GetHealthResponse collects the response values for the GetHealth method.
+type GetHealthResponse struct {
 	Health bool  `json:"health,omitempty"`
 	Err    error `json:"err,omitempty"`
 }
 
-func (r getHealthResponse) Failed() error { return r.Err }
+// Failed implements Failer.
+func (r GetHealthResponse) Failed() error { return r.Err }
 
-type getGreetingRequest struct {
+// GetGreetingRequest collects the request parameters for the GetGreeting method.
+type GetGreetingRequest struct {
 	Name string
 }
 
-type getGreetingResponse struct {
+// GetGreetingResponse collects the response values for the GetGreeting method.
+type GetGreetingResponse struct {
 	Greeting string `json:"greeting,omitempty"`
 	Err      error  `json:"err,omitempty"`
 }
 
-func (r getGreetingResponse) Failed() error { return r.Err }
+// Failed implements Failer.
+func (r GetGreetingResponse) Failed() error { return r.Err }
