@@ -21,16 +21,16 @@ type loggingMiddleware struct {
 	next   Service
 }
 
-func (m loggingMiddleware) GetHealth() (healthy bool, err error) {
+func (m loggingMiddleware) Health() (healthy bool, err error) {
 	defer func() {
-		m.logger.Log("method", "GetHealth", "healthy", healthy, "err", err)
+		m.logger.Log("method", "Health", "healthy", healthy, "err", err)
 	}()
-	return m.next.GetHealth()
+	return m.next.Health()
 }
 
-func (m loggingMiddleware) GetGreeting(ctx context.Context, name string) (greeting string, err error) {
+func (m loggingMiddleware) Greeting(ctx context.Context, name string) (greeting string, err error) {
 	defer func() {
-		m.logger.Log("method", "GetGreeting", "name", name, "greeting", greeting, "err", err)
+		m.logger.Log("method", "Greeting", "name", name, "greeting", greeting, "err", err)
 	}()
-	return m.next.GetGreeting(ctx, name)
+	return m.next.Greeting(ctx, name)
 }

@@ -13,8 +13,8 @@ import (
 // meant to be used as a helper struct, to collect all of the endpoints into a
 // single parameter.
 type Endpoints struct {
-	GetHealthEndpoint   endpoint.Endpoint // used by Consul for the healthcheck
-	GetGreetingEndpoint endpoint.Endpoint
+	HealthEndpoint   endpoint.Endpoint // used by Consul for the healthcheck
+	GreetingEndpoint endpoint.Endpoint
 }
 
 // MakeEndpoints returns service Endoints, and wires in all the provided
@@ -22,36 +22,36 @@ type Endpoints struct {
 func MakeEndpoints(s greeterservice.Service, logger log.Logger) Endpoints {
 	var healthEndpoint endpoint.Endpoint
 	{
-		healthEndpoint = MakeGetHealthEndpoint(s)
-		healthEndpoint = LoggingMiddleware(log.With(logger, "method", "GetHealth"))(healthEndpoint)
+		healthEndpoint = MakeHealthEndpoint(s)
+		healthEndpoint = LoggingMiddleware(log.With(logger, "method", "Health"))(healthEndpoint)
 	}
 
-	var greeterEndpoint endpoint.Endpoint
+	var greetingEndpoint endpoint.Endpoint
 	{
-		greeterEndpoint = MakeGetGreetingEndpoint(s)
-		greeterEndpoint = LoggingMiddleware(log.With(logger, "method", "GetGreeting"))(greeterEndpoint)
+		greetingEndpoint = MakeGreetingEndpoint(s)
+		greetingEndpoint = LoggingMiddleware(log.With(logger, "method", "Greeting"))(greetingEndpoint)
 	}
 
 	return Endpoints{
-		GetHealthEndpoint:   healthEndpoint,
-		GetGreetingEndpoint: greeterEndpoint,
+		HealthEndpoint:   healthEndpoint,
+		GreetingEndpoint: greetingEndpoint,
 	}
 }
 
-// MakeGetHealthEndpoint constructs a GetHealth endpoint wrapping the service.
-func MakeGetHealthEndpoint(s greeterservice.Service) endpoint.Endpoint {
+// MakeHealthEndpoint constructs a Health endpoint wrapping the service.
+func MakeHealthEndpoint(s greeterservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		health, err := s.GetHealth()
-		return GetHealthResponse{Health: health, Err: err}, nil
+		health, err := s.Health()
+		return HealthResponse{Health: health, Err: err}, nil
 	}
 }
 
-// MakeGetGreetingEndpoint constructs a GetGreeter endpoint wrapping the service.
-func MakeGetGreetingEndpoint(s greeterservice.Service) endpoint.Endpoint {
+// MakeGreetingEndpoint constructs a Greeter endpoint wrapping the service.
+func MakeGreetingEndpoint(s greeterservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(GetGreetingRequest)
-		greeting, err := s.GetGreeting(ctx, req.Name)
-		return GetGreetingResponse{Greeting: greeting, Err: err}, nil
+		req := request.(GreetingRequest)
+		greeting, err := s.Greeting(ctx, req.Name)
+		return GreetingResponse{Greeting: greeting, Err: err}, nil
 	}
 }
 
@@ -62,28 +62,28 @@ type Failer interface {
 	Failed() error
 }
 
-// GetHealthRequest collects the request parameters for the GetHealth method.
-type GetHealthRequest struct{}
+// HealthRequest collects the request parameters for the Health method.
+type HealthRequest struct{}
 
-// GetHealthResponse collects the response values for the GetHealth method.
-type GetHealthResponse struct {
+// HealthResponse collects the response values for the Health method.
+type HealthResponse struct {
 	Health bool  `json:"health,omitempty"`
 	Err    error `json:"err,omitempty"`
 }
 
 // Failed implements Failer.
-func (r GetHealthResponse) Failed() error { return r.Err }
+func (r HealthResponse) Failed() error { return r.Err }
 
-// GetGreetingRequest collects the request parameters for the GetGreeting method.
-type GetGreetingRequest struct {
+// GreetingRequest collects the request parameters for the Greeting method.
+type GreetingRequest struct {
 	Name string
 }
 
-// GetGreetingResponse collects the response values for the GetGreeting method.
-type GetGreetingResponse struct {
+// GreetingResponse collects the response values for the Greeting method.
+type GreetingResponse struct {
 	Greeting string `json:"greeting,omitempty"`
 	Err      error  `json:"err,omitempty"`
 }
 
 // Failed implements Failer.
-func (r GetGreetingResponse) Failed() error { return r.Err }
+func (r GreetingResponse) Failed() error { return r.Err }

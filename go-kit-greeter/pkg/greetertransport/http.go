@@ -26,36 +26,36 @@ func NewHTTPHandler(endpoints greeterendpoint.Endpoints, logger log.Logger) http
 		httptransport.ServerErrorLogger(logger),
 	}
 
-	// GET /health      retrieves service heath information
-	// GET /hello?name  retrieves greeting
+	// GET /health         retrieves service heath information
+	// GET /greeting?name  retrieves greeting
 
 	m.Methods("GET").Path("/health").Handler(httptransport.NewServer(
-		endpoints.GetHealthEndpoint,
-		decodeHTTPGetHealthRequest,
+		endpoints.HealthEndpoint,
+		decodeHTTPHealthRequest,
 		encodeHTTPGenericResponse,
 		options...,
 	))
-	m.Methods("GET").Path("/hello").Handler(httptransport.NewServer(
-		endpoints.GetGreetingEndpoint,
-		decodeHTTPGetGreeterRequest,
+	m.Methods("GET").Path("/greetig").Handler(httptransport.NewServer(
+		endpoints.GreetingEndpoint,
+		decodeHTTPGreeterRequest,
 		encodeHTTPGenericResponse,
 		options...,
 	))
 	return m
 }
 
-func decodeHTTPGetHealthRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	req := greeterendpoint.GetHealthRequest{}
+func decodeHTTPHealthRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	req := greeterendpoint.HealthRequest{}
 	return req, nil
 }
 
-func decodeHTTPGetGreeterRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeHTTPGreeterRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	vars := r.URL.Query()
 	names, exists := vars["name"]
 	if !exists || len(names) != 1 {
 		return nil, ErrBadRouting
 	}
-	req := greeterendpoint.GetGreetingRequest{Name: names[0]}
+	req := greeterendpoint.GreetingRequest{Name: names[0]}
 	return req, nil
 }
 

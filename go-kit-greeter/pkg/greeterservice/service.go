@@ -8,8 +8,8 @@ import (
 
 // Service describe greetings service.
 type Service interface {
-	GetHealth() (bool, error)
-	GetGreeting(ctx context.Context, name string) (string, error)
+	Health() (bool, error)
+	Greeting(ctx context.Context, name string) (string, error)
 }
 
 // New returns a basic Service with all of the expected middlewares wired in.
@@ -29,11 +29,11 @@ func NewGreeterService() Service {
 
 type greeterService struct{}
 
-func (s greeterService) GetHealth() (bool, error) {
+func (s greeterService) Health() (bool, error) {
 	return true, nil
 }
 
-func (s greeterService) GetGreeting(ctx context.Context, name string) (string, error) {
+func (s greeterService) Greeting(ctx context.Context, name string) (string, error) {
 	greeting := "GO-KIT Hello " + name
 	return greeting, nil
 }
