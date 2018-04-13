@@ -50,12 +50,12 @@ func decodeHTTPGetHealthRequest(_ context.Context, r *http.Request) (interface{}
 }
 
 func decodeHTTPGetGreeterRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	vars := mux.Vars(r)
-	name, ok := vars["name"]
-	if !ok {
+	vars := r.URL.Query()
+	names, exists := vars["name"]
+	if !exists || len(names) != 1 {
 		return nil, ErrBadRouting
 	}
-	req := greeterendpoint.GetGreetingRequest{Name: name}
+	req := greeterendpoint.GetGreetingRequest{Name: names[0]}
 	return req, nil
 }
 
