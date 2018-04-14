@@ -35,7 +35,7 @@ func NewHTTPHandler(endpoints greeterendpoint.Endpoints, logger log.Logger) http
 		encodeHTTPGenericResponse,
 		options...,
 	))
-	m.Methods("GET").Path("/greetig").Handler(httptransport.NewServer(
+	m.Methods("GET").Path("/greeting").Handler(httptransport.NewServer(
 		endpoints.GreetingEndpoint,
 		decodeHTTPGreeterRequest,
 		encodeHTTPGenericResponse,
