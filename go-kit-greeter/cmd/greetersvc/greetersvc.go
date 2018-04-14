@@ -10,9 +10,11 @@ import (
 	"syscall"
 	"text/tabwriter"
 
+	pb "github.com/antklim/go-microservices/go-kit-greeter/pb"
 	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greeterendpoint"
 	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greeterservice"
 	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greetertransport"
+	"google.golang.org/grpc"
 
 	"github.com/go-kit/kit/log"
 	"github.com/oklog/oklog/pkg/group"
@@ -23,9 +25,10 @@ func main() {
 	var (
 		debugAddr = fs.String("debug.addr", ":8080", "Debug and metrics listen address")
 		httpAddr  = fs.String("http.addr", ":8081", "HTTP Listen Address")
+		grpcAddr  = fs.String("grpc-addr", ":8082", "gRPC listen address")
 	)
 	fs.Usage = usageFor(fs, os.Args[0]+" [flags]")
-	flag.Parse()
+	fs.Parse(os.Args[1:])
 
 	var logger log.Logger
 	{
@@ -38,6 +41,7 @@ func main() {
 		service     = greeterservice.New(logger)
 		endpoints   = greeterendpoint.MakeEndpoints(service, logger)
 		httpHandler = greetertransport.NewHTTPHandler(endpoints, logger)
+		grpcServer  = greetertransport.NewGRPCServer(endpoints, logger)
 	)
 
 	var g group.Group
@@ -68,6 +72,22 @@ func main() {
 			return http.Serve(httpListener, httpHandler)
 		}, func(error) {
 			httpListener.Close()
+		})
+	}
+	{
+		// The gRPC listener mounts the Go kit gRPC server we created.
+		grpcListener, err := net.Listen("tcp", *grpcAddr)
+		if err != nil {
+			logger.Log("transport", "gRPC", "during", "Listen", "err", err)
+			os.Exit(1)
+		}
+		g.Add(func() error {
+			logger.Log("transport", "gRPC", "addr", *grpcAddr)
+			baseServer := grpc.NewServer()
+			pb.RegisterGreeterServer(baseServer, grpcServer)
+			return baseServer.Serve(grpcListener)
+		}, func(error) {
+			grpcListener.Close()
 		})
 	}
 	{
