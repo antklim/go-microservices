@@ -1,10 +1,13 @@
 package greetertransport
 
 import (
+	"context"
+
 	"github.com/antklim/go-microservices/go-kit-greeter/pb"
 	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greeterendpoint"
 	"github.com/go-kit/kit/log"
 	grpctransport "github.com/go-kit/kit/transport/grpc"
+	oldcontext "golang.org/x/net/context"
 )
 
 type grpcServer struct {
@@ -19,12 +22,28 @@ func NewGRPCServer(endpoints greeterendpoint.Endpoints, logger log.Logger) pb.Gr
 
 	return &grpcServer{
 		greeter: grpctransport.NewServer(
-			endpoints.GetGreetingEndpoint,
-			decodeGRPCGetGreetingRequest,
-			encodeGRPCGetGreetingResponse,
+			endpoints.GreetingEndpoint,
+			decodeGRPCGreetingRequest,
+			encodeGRPCGreetingResponse,
 			options...,
 		),
 	}
 }
 
-func (s *grpcServer) Hello()
+func (s *grpcServer) Greeting(ctx oldcontext.Context, req *pb.GreetingRequest) (*pb.GreetingResponse, error) {
+	_, res, err := s.greeter.ServeGRPC(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	return res.(*pb.GreetingResponse), nil
+}
+
+func decodeGRPCGreetingRequest(_ context.Context, grpcReq interface{}) (interface{}, error) {
+	req := grpcReq.(*pb.GreetingRequest)
+	return greeterendpoint.GreetingRequest{Name: req.Name}, nil
+}
+
+func encodeGRPCGreetingResponse(_ context.Context, response interface{}) (interface{}, error) {
+	res := response.(greeterendpoint.GreetingResponse)
+	return &pb.GreetingResponse{Greeting: res.Greeting}, nil
+}
