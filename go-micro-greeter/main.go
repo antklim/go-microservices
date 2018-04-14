@@ -1,15 +1,18 @@
 package main
 
 import (
-	proto "github.com/antklim/go-microservices/go-micro-greeter/proto"
+	"log"
+
+	pb "github.com/antklim/go-microservices/go-micro-greeter/pb"
 	"github.com/micro/go-micro"
 	"golang.org/x/net/context"
-	"log"
 )
 
+// Greeter implements greeter service.
 type Greeter struct{}
 
-func (g *Greeter) Hello(ctx context.Context, in *proto.HelloRequest, out *proto.HelloResponse) error {
+// Greeting method implementation.
+func (g *Greeter) Greeting(ctx context.Context, in *pb.GreetingRequest, out *pb.GreetingResponse) error {
 	out.Greeting = "GO-MICRO Hello " + in.Name
 	return nil
 }
@@ -22,7 +25,7 @@ func main() {
 
 	service.Init()
 
-	proto.RegisterGreeterHandler(service.Server(), new(Greeter))
+	pb.RegisterGreeterHandler(service.Server(), new(Greeter))
 
 	if err := service.Run(); err != nil {
 		log.Fatal(err)
