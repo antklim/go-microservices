@@ -7,8 +7,11 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greeterendpoint"
+	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
@@ -46,8 +49,44 @@ func NewHTTPHandler(endpoints greeterendpoint.Endpoints, logger log.Logger) http
 	return m
 }
 
-func NewHTTPClient() (greeterendpoint.Endpoints, error) {
+// MakeHTTPClientEndpoints returns an Endpoints struct where each endpoint invokes
+// the corresponding method on the remote instance, via a transport/http.Client.
+func MakeHTTPClientEndpoints(instance string) (greeterendpoint.Endpoints, error) {
+	if !strings.HasPrefix(instance, "http") {
+		instance = "http://" + instance
+	}
+	tgt, err := url.Parse(instance)
+	if err != nil {
+		return greeterendpoint.Endpoints{}, err
+	}
+	tgt.Path = ""
 
+	options := []httptransport.ClientOption{}
+
+	var healthEndpoint endpoint.Endpoint
+	{
+		healthEndpoint = httptransport.NewClient(
+			"GET",
+			tgt,
+			encodeHTTPHealthRequest,
+			decodeHTTPHealthResponse,
+			options...).Endpoint()
+	}
+
+	var greetingEndpoint endpoint.Endpoint
+	{
+		greetingEndpoint = httptransport.NewClient(
+			"GET",
+			tgt,
+			encodeHTTPGreetingRequest,
+			decodeHTTPGreetingResponse,
+			options...).Endpoint()
+	}
+
+	return greeterendpoint.Endpoints{
+		HealthEndpoint:   healthEndpoint,
+		GreetingEndpoint: greetingEndpoint,
+	}, nil
 }
 
 func encodeHTTPHealthRequest(ctx context.Context, req *http.Request, request interface{}) error {

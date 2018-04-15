@@ -6,6 +6,7 @@ import (
 
 	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greeterendpoint"
 	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greeterservice"
+	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greetertransport"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/sd"
@@ -39,14 +40,14 @@ func New(consulAddr string, logger log.Logger) (greeterservice.Service, error) {
 		endpoints greeterendpoint.Endpoints
 	)
 	{
-		factory := factoryFor(greeterservice.MakeHealthEndpoint)
+		factory := factoryFor(greeterendpoint.MakeHealthEndpoint)
 		endpointer := sd.NewEndpointer(instancer, factory, logger)
 		balancer := lb.NewRoundRobin(endpointer)
 		retry := lb.Retry(retryMax, retryTimeout, balancer)
 		endpoints.HealthEndpoint = retry
 	}
 	{
-		factory := factoryFor(greeterservice.MakeGreetingEndpoint)
+		factory := factoryFor(greeterendpoint.MakeGreetingEndpoint)
 		endpointer := sd.NewEndpointer(instancer, factory, logger)
 		balancer := lb.NewRoundRobin(endpointer)
 		retry := lb.Retry(retryMax, retryTimeout, balancer)
@@ -58,7 +59,7 @@ func New(consulAddr string, logger log.Logger) (greeterservice.Service, error) {
 
 func factoryFor(makeEndpoint func(greeterservice.Service) endpoint.Endpoint) sd.Factory {
 	return func(instance string) (endpoint.Endpoint, io.Closer, error) {
-		service, err := greeterendpoint.MakeClientEndpoints(instance)
+		service, err := greetertransport.MakeHTTPClientEndpoints(instance)
 		if err != nil {
 			return nil, nil, err
 		}

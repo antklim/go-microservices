@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 
-	greeterservice "github.com/antklim/go-microservices/go-kit-greeter/pkg/greeterservice"
+	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greeterservice"
 	"github.com/go-kit/kit/endpoint"
 )
 
@@ -37,30 +37,6 @@ func MakeServerEndpoints(s greeterservice.Service, logger log.Logger) Endpoints 
 		GreetingEndpoint: greetingEndpoint,
 	}
 }
-
-// // MakeClientEndpoints returns an Endpoints struct where each endpoint invokes
-// // the corresponding method on the remote instance, via a transport/http.Client.
-// func MakeClientEndpoints(instance string) (Endpoints, error) {
-// 	if !strings.HasPrefix(instance, "http") {
-// 		instance = "http://" + instance
-// 	}
-// 	tgt, err := url.Parse(instance)
-// 	if err != nil {
-// 		return Endpoints{}, err
-// 	}
-// 	tgt.Path = ""
-
-// 	options := []httptransport.ClientOption{}
-
-// 	var healthEndpoint endpoint.Endpoint
-// 	{
-// 		httptransport.NewClient("GET", tgt, encodeHealthRequest, decode)
-// 	}
-
-// 	return Endpoints{
-// 		HealthEndpoint: httptransport.NewClient("GET", tgt, encodeHealthRequest, )
-// 	}
-// }
 
 // MakeHealthEndpoint constructs a Health endpoint wrapping the service.
 func MakeHealthEndpoint(s greeterservice.Service) endpoint.Endpoint {
