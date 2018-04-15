@@ -8,7 +8,7 @@ import (
 
 // Service describe greetings service.
 type Service interface {
-	Health() (bool, error)
+	Health(context.Context, interface{}) (bool, error)
 	Greeting(ctx context.Context, name string) (string, error)
 }
 
@@ -29,7 +29,7 @@ func NewGreeterService() Service {
 
 type greeterService struct{}
 
-func (s greeterService) Health() (bool, error) {
+func (s greeterService) Health(_ context.Context, _ interface{}) (bool, error) {
 	return true, nil
 }
 

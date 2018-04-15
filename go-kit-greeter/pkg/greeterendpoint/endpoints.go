@@ -65,7 +65,7 @@ func MakeServerEndpoints(s greeterservice.Service, logger log.Logger) Endpoints 
 // MakeHealthEndpoint constructs a Health endpoint wrapping the service.
 func MakeHealthEndpoint(s greeterservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		health, err := s.Health()
+		health, err := s.Health(ctx, request)
 		return HealthResponse{Health: health, Err: err}, nil
 	}
 }
@@ -77,6 +77,26 @@ func MakeGreetingEndpoint(s greeterservice.Service) endpoint.Endpoint {
 		greeting, err := s.Greeting(ctx, req.Name)
 		return GreetingResponse{Greeting: greeting, Err: err}, nil
 	}
+}
+
+// Health implements greeterservice.Service.
+func (e Endpoints) Health(ctx context.Context, request interface{}) (bool, error) {
+	response, err := e.HealthEndpoint(ctx, request)
+	if err != nil {
+		return false, err
+	}
+	resp := response.(HealthResponse)
+	return resp.Health, err
+}
+
+// Greeting implements greeterservice.Service.
+func (e Endpoints) Greeting(ctx context.Context, name string) (string, error) {
+	response, err := e.GreetingEndpoint(ctx, name)
+	if err != nil {
+		return "", err
+	}
+	resp := response.(GreetingResponse)
+	return resp.Greeting, err
 }
 
 // Failer is an interface that should be implemented by response types.

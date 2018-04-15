@@ -46,6 +46,10 @@ func NewHTTPHandler(endpoints greeterendpoint.Endpoints, logger log.Logger) http
 	return m
 }
 
+func NewHTTPClient() (greeterendpoint.Endpoints, error) {
+
+}
+
 func encodeHTTPHealthRequest(ctx context.Context, req *http.Request, request interface{}) error {
 	// r.Methods("GET").path("/health")
 	req.Method, req.URL.Path = "GET", "/health"
