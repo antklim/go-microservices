@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
+	"syscall"
 	"text/tabwriter"
 	"time"
 
@@ -17,6 +19,7 @@ import (
 	"github.com/go-kit/kit/sd/consul"
 	"github.com/go-kit/kit/sd/lb"
 	consulapi "github.com/hashicorp/consul/api"
+	"github.com/oklog/oklog/pkg/group"
 )
 
 // New returns a service that's load-balanced over instances of greeterservice
@@ -86,11 +89,31 @@ func main() {
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
 
-	client, err := New(consulAddr, logger)
-	if err != nil {
-		logger.Log("transport", "HTTP", "during", "ConsulConnect", "err", err)
-		os.Exit1()
+	var g group.Group
+	{
+		g.Add(func() error {
+			_, err := New(*consulAddr, logger)
+			return err
+		}, func(error) {
+		})
 	}
+	{
+		// This function just sits and waits for ctrl-C.
+		cancelInterrupt := make(chan struct{})
+		g.Add(func() error {
+			c := make(chan os.Signal, 1)
+			signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+			select {
+			case sig := <-c:
+				return fmt.Errorf("received signal %s", sig)
+			case <-cancelInterrupt:
+				return nil
+			}
+		}, func(error) {
+			close(cancelInterrupt)
+		})
+	}
+	logger.Log("exit", g.Run())
 }
 
 func usageFor(fs *flag.FlagSet, short string) func() {
