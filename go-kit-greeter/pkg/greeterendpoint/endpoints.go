@@ -17,9 +17,9 @@ type Endpoints struct {
 	GreetingEndpoint endpoint.Endpoint
 }
 
-// MakeEndpoints returns service Endoints, and wires in all the provided
+// MakeServerEndpoints returns service Endoints, and wires in all the provided
 // middlewares.
-func MakeEndpoints(s greeterservice.Service, logger log.Logger) Endpoints {
+func MakeServerEndpoints(s greeterservice.Service, logger log.Logger) Endpoints {
 	var healthEndpoint endpoint.Endpoint
 	{
 		healthEndpoint = MakeHealthEndpoint(s)
@@ -37,6 +37,30 @@ func MakeEndpoints(s greeterservice.Service, logger log.Logger) Endpoints {
 		GreetingEndpoint: greetingEndpoint,
 	}
 }
+
+// // MakeClientEndpoints returns an Endpoints struct where each endpoint invokes
+// // the corresponding method on the remote instance, via a transport/http.Client.
+// func MakeClientEndpoints(instance string) (Endpoints, error) {
+// 	if !strings.HasPrefix(instance, "http") {
+// 		instance = "http://" + instance
+// 	}
+// 	tgt, err := url.Parse(instance)
+// 	if err != nil {
+// 		return Endpoints{}, err
+// 	}
+// 	tgt.Path = ""
+
+// 	options := []httptransport.ClientOption{}
+
+// 	var healthEndpoint endpoint.Endpoint
+// 	{
+// 		httptransport.NewClient("GET", tgt, encodeHealthRequest, decode)
+// 	}
+
+// 	return Endpoints{
+// 		HealthEndpoint: httptransport.NewClient("GET", tgt, encodeHealthRequest, )
+// 	}
+// }
 
 // MakeHealthEndpoint constructs a Health endpoint wrapping the service.
 func MakeHealthEndpoint(s greeterservice.Service) endpoint.Endpoint {

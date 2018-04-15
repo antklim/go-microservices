@@ -1,9 +1,11 @@
 package greetertransport
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greeterendpoint"
@@ -37,11 +39,17 @@ func NewHTTPHandler(endpoints greeterendpoint.Endpoints, logger log.Logger) http
 	))
 	m.Methods("GET").Path("/greeting").Handler(httptransport.NewServer(
 		endpoints.GreetingEndpoint,
-		decodeHTTPGreeterRequest,
+		decodeHTTPGreetingRequest,
 		encodeHTTPGenericResponse,
 		options...,
 	))
 	return m
+}
+
+func encodeHTTPHealthRequest(ctx context.Context, req *http.Request, request interface{}) error {
+	// r.Methods("GET").path("/health")
+	req.Method, req.URL.Path = "GET", "/health"
+	return encodeHTTPGenericRequest(ctx, req, request)
 }
 
 func decodeHTTPHealthRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -49,7 +57,19 @@ func decodeHTTPHealthRequest(_ context.Context, r *http.Request) (interface{}, e
 	return req, nil
 }
 
-func decodeHTTPGreeterRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeHTTPHealthResponse(_ context.Context, resp *http.Response) (interface{}, error) {
+	var response greeterendpoint.HealthResponse
+	err := json.NewDecoder(resp.Body).Decode(&response)
+	return response, err
+}
+
+func encodeHTTPGreetingRequest(ctx context.Context, req *http.Request, request interface{}) error {
+	// r.Methods("GET").path("/greeting?name=bob")
+	req.Method, req.URL.Path, req.URL.RawQuery = "GET", "/greeting", "?name=bob"
+	return encodeHTTPGenericRequest(ctx, req, request)
+}
+
+func decodeHTTPGreetingRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	vars := r.URL.Query()
 	names, exists := vars["name"]
 	if !exists || len(names) != 1 {
@@ -57,6 +77,23 @@ func decodeHTTPGreeterRequest(_ context.Context, r *http.Request) (interface{}, 
 	}
 	req := greeterendpoint.GreetingRequest{Name: names[0]}
 	return req, nil
+}
+
+func decodeHTTPGreetingResponse(_ context.Context, resp *http.Response) (interface{}, error) {
+	var response greeterendpoint.GreetingResponse
+	err := json.NewDecoder(resp.Body).Decode(&response)
+	return response, err
+}
+
+// encodeHTTPGenericRequest likewise JSON-encodes the request to the HTTP request body.
+func encodeHTTPGenericRequest(_ context.Context, req *http.Request, request interface{}) error {
+	var buf bytes.Buffer
+	err := json.NewEncoder(&buf).Encode(request)
+	if err != nil {
+		return err
+	}
+	req.Body = ioutil.NopCloser(&buf)
+	return nil
 }
 
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {

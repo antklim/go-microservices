@@ -26,7 +26,6 @@ func main() {
 		debugAddr = fs.String("debug.addr", ":8080", "Debug and metrics listen address")
 		httpAddr  = fs.String("http.addr", ":8081", "HTTP Listen Address")
 		grpcAddr  = fs.String("grpc-addr", ":8082", "gRPC listen address")
-		// consulAddr = fs.String("consul.addr", "", "Consul agent address")
 	)
 	fs.Usage = usageFor(fs, os.Args[0]+" [flags]")
 	fs.Parse(os.Args[1:])
@@ -40,7 +39,7 @@ func main() {
 
 	var (
 		service     = greeterservice.New(logger)
-		endpoints   = greeterendpoint.MakeEndpoints(service, logger)
+		endpoints   = greeterendpoint.MakeServerEndpoints(service, logger)
 		httpHandler = greetertransport.NewHTTPHandler(endpoints, logger)
 		grpcServer  = greetertransport.NewGRPCServer(endpoints, logger)
 	)
@@ -91,23 +90,6 @@ func main() {
 			grpcListener.Close()
 		})
 	}
-	// {
-	// 	// The Consul service discovery domain.
-	// 	var consulClient consul.Client
-	// 	consulConfig := consulApi.DefaultConfig()
-	// 	if len(*consulAddr) > 0 {
-	// 		consulConfig.Address = *consulAddr
-	// 	}
-	// 	consulApiClient, err := consulApi.NewClient(consulConfig)
-	// 	if err != nil {
-	// 		logger.Log("service-discovery", "Consul", "during", "NewClient", "err", err)
-	// 		os.Exit(1)
-	// 	}
-	// 	g.Add(func() error {
-	// 		consulClient = consul.NewClient(consulApiClient)
-	// 	}, func(error) {
-	// 	})
-	// }
 	{
 		// This function just sits and waits for ctrl-C.
 		cancelInterrupt := make(chan struct{})
