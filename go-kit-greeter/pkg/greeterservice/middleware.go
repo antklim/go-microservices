@@ -21,11 +21,11 @@ type loggingMiddleware struct {
 	next   Service
 }
 
-func (m loggingMiddleware) Health() (healthy bool, err error) {
+func (m loggingMiddleware) Health(ctx context.Context, request interface{}) (healthy bool, err error) {
 	defer func() {
 		m.logger.Log("method", "Health", "healthy", healthy, "err", err)
 	}()
-	return m.next.Health()
+	return m.next.Health(ctx, request)
 }
 
 func (m loggingMiddleware) Greeting(ctx context.Context, name string) (greeting string, err error) {
