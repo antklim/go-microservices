@@ -2,35 +2,47 @@ package greeterservice
 
 import (
 	"context"
+	"time"
 
 	"github.com/go-kit/kit/log"
 )
 
-// Middleware describes a service middleware.
-type Middleware func(Service) Service
+// ServiceMiddleware describes a service middleware.
+type ServiceMiddleware func(Service) Service
 
 // LoggingMiddleware takes a logger as a dependency and returns a ServiceMiddleware.
-func LoggingMiddleware(logger log.Logger) Middleware {
+func LoggingMiddleware(logger log.Logger) ServiceMiddleware {
 	return func(next Service) Service {
-		return loggingMiddleware{logger, next}
+		return loggingMiddleware{next, logger}
 	}
 }
 
 type loggingMiddleware struct {
+	Service
 	logger log.Logger
-	next   Service
 }
 
-func (m loggingMiddleware) Health(ctx context.Context, request interface{}) (healthy bool, err error) {
-	defer func() {
-		m.logger.Log("method", "Health", "healthy", healthy, "err", err)
-	}()
-	return m.next.Health(ctx, request)
+func (m loggingMiddleware) Health() (healthy bool) {
+	defer func(begin time.Time) {
+		m.logger.Log(
+			"method", "Health",
+			"healthy", healthy,
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	healthy = m.Service.Health()
+	return
 }
 
-func (m loggingMiddleware) Greeting(ctx context.Context, name string) (greeting string, err error) {
-	defer func() {
-		m.logger.Log("method", "Greeting", "name", name, "greeting", greeting, "err", err)
-	}()
-	return m.next.Greeting(ctx, name)
+func (m loggingMiddleware) Greeting(ctx context.Context, name string) (greeting string) {
+	defer func(begin time.Time) {
+		m.logger.Log(
+			"method", "Greeting",
+			"name", name,
+			"greeting", greeting,
+			"took", time.Since(begin),
+		)
+	}(time.Now())
+	greeting = m.Service.Greeting(name)
+	return
 }
