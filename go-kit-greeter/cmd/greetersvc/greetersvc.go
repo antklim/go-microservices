@@ -25,12 +25,12 @@ import (
 func main() {
 	fs := flag.NewFlagSet("greetersvc", flag.ExitOnError)
 	var (
-		debugAddr  = fs.String("debug.addr", ":8080", "Debug and metrics listen address")
+		debugAddr  = fs.String("debug.addr", ":9100", "Debug and metrics listen address")
 		consulAddr = fs.String("consul.addr", "", "Consul Address")
 		consulPort = fs.String("consul.port", "8500", "Consul Port")
 		httpAddr   = fs.String("http.addr", "", "HTTP Listen Address")
-		httpPort   = fs.String("http.port", "8081", "HTTP Listen Port")
-		grpcAddr   = fs.String("grpc-addr", ":8082", "gRPC listen address")
+		httpPort   = fs.String("http.port", "9110", "HTTP Listen Port")
+		grpcAddr   = fs.String("grpc-addr", ":9120", "gRPC listen address")
 	)
 	fs.Usage = usageFor(fs, os.Args[0]+" [flags]")
 	fs.Parse(os.Args[1:])
