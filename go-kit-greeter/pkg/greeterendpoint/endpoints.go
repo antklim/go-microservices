@@ -41,8 +41,8 @@ func MakeServerEndpoints(s greeterservice.Service, logger log.Logger) Endpoints 
 // MakeHealthEndpoint constructs a Health endpoint wrapping the service.
 func MakeHealthEndpoint(s greeterservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		health, err := s.Health(ctx, request)
-		return HealthResponse{Health: health, Err: err}, nil
+		healthy := s.Health()
+		return HealthResponse{Healthy: healthy}, nil
 	}
 }
 
@@ -50,30 +50,30 @@ func MakeHealthEndpoint(s greeterservice.Service) endpoint.Endpoint {
 func MakeGreetingEndpoint(s greeterservice.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(GreetingRequest)
-		greeting, err := s.Greeting(ctx, req.Name)
-		return GreetingResponse{Greeting: greeting, Err: err}, nil
+		greeting := s.Greeting(req.Name)
+		return GreetingResponse{Greeting: greeting}, nil
 	}
 }
 
 // Health implements greeterservice.Service.
-func (e Endpoints) Health(ctx context.Context, request interface{}) (bool, error) {
-	response, err := e.HealthEndpoint(ctx, request)
-	if err != nil {
-		return false, err
-	}
-	resp := response.(HealthResponse)
-	return resp.Health, err
-}
+// func (e Endpoints) Health(ctx context.Context, request interface{}) (bool, error) {
+// 	response, err := e.HealthEndpoint(ctx, request)
+// 	if err != nil {
+// 		return false, err
+// 	}
+// 	resp := response.(HealthResponse)
+// 	return resp.Health, err
+// }
 
-// Greeting implements greeterservice.Service.
-func (e Endpoints) Greeting(ctx context.Context, name string) (string, error) {
-	response, err := e.GreetingEndpoint(ctx, name)
-	if err != nil {
-		return "", err
-	}
-	resp := response.(GreetingResponse)
-	return resp.Greeting, err
-}
+// // Greeting implements greeterservice.Service.
+// func (e Endpoints) Greeting(ctx context.Context, name string) (string, error) {
+// 	response, err := e.GreetingEndpoint(ctx, name)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	resp := response.(GreetingResponse)
+// 	return resp.Greeting, err
+// }
 
 // Failer is an interface that should be implemented by response types.
 // Response encoders can check if responses are Failer, and if so if they've
@@ -87,8 +87,8 @@ type HealthRequest struct{}
 
 // HealthResponse collects the response values for the Health method.
 type HealthResponse struct {
-	Health bool  `json:"health,omitempty"`
-	Err    error `json:"err,omitempty"`
+	Healthy bool  `json:"healthy,omitempty"`
+	Err     error `json:"err,omitempty"`
 }
 
 // Failed implements Failer.
@@ -96,7 +96,7 @@ func (r HealthResponse) Failed() error { return r.Err }
 
 // GreetingRequest collects the request parameters for the Greeting method.
 type GreetingRequest struct {
-	Name string
+	Name string `json:"name,omitempty"`
 }
 
 // GreetingResponse collects the response values for the Greeting method.
