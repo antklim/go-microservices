@@ -55,26 +55,6 @@ func MakeGreetingEndpoint(s greeterservice.Service) endpoint.Endpoint {
 	}
 }
 
-// Health implements greeterservice.Service.
-// func (e Endpoints) Health(ctx context.Context, request interface{}) (bool, error) {
-// 	response, err := e.HealthEndpoint(ctx, request)
-// 	if err != nil {
-// 		return false, err
-// 	}
-// 	resp := response.(HealthResponse)
-// 	return resp.Health, err
-// }
-
-// // Greeting implements greeterservice.Service.
-// func (e Endpoints) Greeting(ctx context.Context, name string) (string, error) {
-// 	response, err := e.GreetingEndpoint(ctx, name)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	resp := response.(GreetingResponse)
-// 	return resp.Greeting, err
-// }
-
 // Failer is an interface that should be implemented by response types.
 // Response encoders can check if responses are Failer, and if so if they've
 // failed, and if so encode them using a separate write path based on the error.

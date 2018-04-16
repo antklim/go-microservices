@@ -44,68 +44,10 @@ func NewHTTPHandler(endpoints greeterendpoint.Endpoints, logger log.Logger) http
 	return m
 }
 
-// MakeHTTPClientEndpoints returns an Endpoints struct where each endpoint invokes
-// the corresponding method on the remote instance, via a transport/http.Client.
-// func MakeHTTPClientEndpoints(instance string) (greeterendpoint.Endpoints, error) {
-// 	if !strings.HasPrefix(instance, "http") {
-// 		instance = "http://" + instance
-// 	}
-// 	tgt, err := url.Parse(instance)
-// 	if err != nil {
-// 		return greeterendpoint.Endpoints{}, err
-// 	}
-// 	tgt.Path = ""
-
-// 	options := []httptransport.ClientOption{}
-
-// 	var healthEndpoint endpoint.Endpoint
-// 	{
-// 		healthEndpoint = httptransport.NewClient(
-// 			"GET",
-// 			tgt,
-// 			encodeHTTPHealthRequest,
-// 			decodeHTTPHealthResponse,
-// 			options...).Endpoint()
-// 	}
-
-// 	var greetingEndpoint endpoint.Endpoint
-// 	{
-// 		greetingEndpoint = httptransport.NewClient(
-// 			"GET",
-// 			tgt,
-// 			encodeHTTPGreetingRequest,
-// 			decodeHTTPGreetingResponse,
-// 			options...).Endpoint()
-// 	}
-
-// 	return greeterendpoint.Endpoints{
-// 		HealthEndpoint:   healthEndpoint,
-// 		GreetingEndpoint: greetingEndpoint,
-// 	}, nil
-// }
-
-// func encodeHTTPHealthRequest(ctx context.Context, req *http.Request, request interface{}) error {
-// 	// r.Methods("GET").path("/health")
-// 	req.Method, req.URL.Path = "GET", "/health"
-// 	return encodeHTTPGenericRequest(ctx, req, request)
-// }
-
 // DecodeHTTPHealthRequest method.
 func DecodeHTTPHealthRequest(_ context.Context, _ *http.Request) (interface{}, error) {
 	return greeterendpoint.HealthRequest{}, nil
 }
-
-// func decodeHTTPHealthResponse(_ context.Context, resp *http.Response) (interface{}, error) {
-// 	var response greeterendpoint.HealthResponse
-// 	err := json.NewDecoder(resp.Body).Decode(&response)
-// 	return response, err
-// }
-
-// func encodeHTTPGreetingRequest(ctx context.Context, req *http.Request, request interface{}) error {
-// 	// r.Methods("GET").path("/greeting?name=bob")
-// 	req.Method, req.URL.Path, req.URL.RawQuery = "GET", "/greeting", "?name=bob"
-// 	return encodeHTTPGenericRequest(ctx, req, request)
-// }
 
 // DecodeHTTPGreetingRequest method.
 func DecodeHTTPGreetingRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -117,23 +59,6 @@ func DecodeHTTPGreetingRequest(_ context.Context, r *http.Request) (interface{},
 	req := greeterendpoint.GreetingRequest{Name: names[0]}
 	return req, nil
 }
-
-// func decodeHTTPGreetingResponse(_ context.Context, resp *http.Response) (interface{}, error) {
-// 	var response greeterendpoint.GreetingResponse
-// 	err := json.NewDecoder(resp.Body).Decode(&response)
-// 	return response, err
-// }
-
-// // encodeHTTPGenericRequest likewise JSON-encodes the request to the HTTP request body.
-// func encodeHTTPGenericRequest(_ context.Context, req *http.Request, request interface{}) error {
-// 	var buf bytes.Buffer
-// 	err := json.NewEncoder(&buf).Encode(request)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	req.Body = ioutil.NopCloser(&buf)
-// 	return nil
-// }
 
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	w.WriteHeader(err2code(err))

@@ -10,7 +10,9 @@ import (
 	"syscall"
 	"text/tabwriter"
 
+	"github.com/antklim/go-microservices/go-kit-greeter/pb"
 	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greetersd"
+	"google.golang.org/grpc"
 
 	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greeterendpoint"
 	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greeterservice"
@@ -28,7 +30,7 @@ func main() {
 		consulPort = fs.String("consul.port", "8500", "Consul Port")
 		httpAddr   = fs.String("http.addr", "", "HTTP Listen Address")
 		httpPort   = fs.String("http.port", "8081", "HTTP Listen Port")
-		// grpcAddr  = fs.String("grpc-addr", ":8082", "gRPC listen address")
+		grpcAddr   = fs.String("grpc-addr", ":8082", "gRPC listen address")
 	)
 	fs.Usage = usageFor(fs, os.Args[0]+" [flags]")
 	fs.Parse(os.Args[1:])
@@ -50,7 +52,7 @@ func main() {
 		endpoints   = greeterendpoint.MakeServerEndpoints(service, logger)
 		httpHandler = greetertransport.NewHTTPHandler(endpoints, logger)
 		registar    = greetersd.ConsulRegister(*consulAddr, *consulPort, *httpAddr, *httpPort)
-		// grpcServer  = greetertransport.NewGRPCServer(endpoints, logger)
+		grpcServer  = greetertransport.NewGRPCServer(endpoints, logger)
 	)
 
 	var g group.Group
@@ -70,6 +72,7 @@ func main() {
 		})
 	}
 	{
+		// The service discovery registration.
 		g.Add(func() error {
 			logger.Log("transport", "HTTP", "addr", *httpAddr, "port", *httpPort)
 			registar.Register()
@@ -79,36 +82,22 @@ func main() {
 			registar.Deregister()
 		})
 	}
-	// {
-	// 	// The HTTP listener mounts the Go kit HTTP handler we created.
-	// 	httpListener, err := net.Listen("tcp", *httpAddr)
-	// 	if err != nil {
-	// 		logger.Log("transport", "HTTP", "during", "Listen", "err", err)
-	// 		os.Exit(1)
-	// 	}
-	// 	g.Add(func() error {
-	// 		logger.Log("transport", "HTTP", "addr", *httpAddr)
-	// 		return http.Serve(httpListener, httpHandler)
-	// 	}, func(error) {
-	// 		httpListener.Close()
-	// 	})
-	// }
-	// {
-	// 	// The gRPC listener mounts the Go kit gRPC server we created.
-	// 	grpcListener, err := net.Listen("tcp", *grpcAddr)
-	// 	if err != nil {
-	// 		logger.Log("transport", "gRPC", "during", "Listen", "err", err)
-	// 		os.Exit(1)
-	// 	}
-	// 	g.Add(func() error {
-	// 		logger.Log("transport", "gRPC", "addr", *grpcAddr)
-	// 		baseServer := grpc.NewServer()
-	// 		pb.RegisterGreeterServer(baseServer, grpcServer)
-	// 		return baseServer.Serve(grpcListener)
-	// 	}, func(error) {
-	// 		grpcListener.Close()
-	// 	})
-	// }
+	{
+		// The gRPC listener mounts the Go kit gRPC server we created.
+		grpcListener, err := net.Listen("tcp", *grpcAddr)
+		if err != nil {
+			logger.Log("transport", "gRPC", "during", "Listen", "err", err)
+			os.Exit(1)
+		}
+		g.Add(func() error {
+			logger.Log("transport", "gRPC", "addr", *grpcAddr)
+			baseServer := grpc.NewServer()
+			pb.RegisterGreeterServer(baseServer, grpcServer)
+			return baseServer.Serve(grpcListener)
+		}, func(error) {
+			grpcListener.Close()
+		})
+	}
 	{
 		// This function just sits and waits for ctrl-C.
 		cancelInterrupt := make(chan struct{})
