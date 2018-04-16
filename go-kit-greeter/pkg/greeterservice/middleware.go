@@ -1,7 +1,6 @@
 package greeterservice
 
 import (
-	"context"
 	"time"
 
 	"github.com/go-kit/kit/log"
@@ -34,7 +33,7 @@ func (m loggingMiddleware) Health() (healthy bool) {
 	return
 }
 
-func (m loggingMiddleware) Greeting(ctx context.Context, name string) (greeting string) {
+func (m loggingMiddleware) Greeting(name string) (greeting string) {
 	defer func(begin time.Time) {
 		m.logger.Log(
 			"method", "Greeting",
