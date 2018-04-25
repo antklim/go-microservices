@@ -1,0 +1,7 @@
+{
+  "Server": {
+    "HTTPPort": 9080,
+    "Log": "./app.log",
+    "HTTPAccessLog": "./access.log"
+  }
+}

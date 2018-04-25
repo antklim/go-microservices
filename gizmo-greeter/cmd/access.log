@@ -1,0 +1,4 @@
+::1 - - [25/Apr/2018:10:35:21 +1000] "GET /health HTTP/1.1" 200 17 "" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36"
+::1 - - [25/Apr/2018:10:35:27 +1000] "GET /echo HTTP/1.1" 404 19 "" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36"
+::1 - - [25/Apr/2018:10:35:35 +1000] "GET /greetin HTTP/1.1" 404 19 "" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36"
+::1 - - [25/Apr/2018:10:35:41 +1000] "GET /greeting HTTP/1.1" 200 30 "" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36"

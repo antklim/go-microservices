@@ -1,0 +1,7 @@
+{"level":"info","msg":"Starting new gizmo-hello-world--7820bd31-fb16-40ce-64ae-14d9bc919f8a server","time":"2018-04-25T10:35:03+10:00"}
+{"level":"info","msg":"Listening on [::]:9080","time":"2018-04-25T10:35:03+10:00"}
+{"level":"info","msg":"success!","path":"/health","rawquery":"","time":"2018-04-25T10:35:21+10:00"}
+{"level":"info","msg":"success!","path":"/greeting","rawquery":"","time":"2018-04-25T10:35:41+10:00"}
+{"level":"info","msg":"Received signal interrupt","time":"2018-04-25T10:35:46+10:00"}
+{"level":"info","msg":"Stopping gizmo-hello-world--7820bd31-fb16-40ce-64ae-14d9bc919f8a server","time":"2018-04-25T10:35:46+10:00"}
+{"level":"error","msg":"encountered an error while serving listener: accept tcp [::]:9080: use of closed network connection","time":"2018-04-25T10:35:46+10:00"}
