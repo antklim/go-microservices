@@ -12,8 +12,7 @@ import (
 )
 
 type (
-	// JSONService will implement server.JSONService and
-	// handle all requests to the server.
+	// JSONService will implement server.JSONService and handle all requests to the server.
 	JSONService struct {
 		Endpoints greeterendpoint.Endpoints
 	}
