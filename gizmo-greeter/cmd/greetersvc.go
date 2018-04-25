@@ -1,18 +1,27 @@
 package main
 
 import (
-	service "../pkg/greetertransport"
 	"github.com/NYTimes/gizmo/config"
 	"github.com/NYTimes/gizmo/server"
+	"github.com/antklim/go-microservices/gizmo-greeter/pkg/greeterendpoint"
+	"github.com/antklim/go-microservices/gizmo-greeter/pkg/greeterservice"
+	"github.com/antklim/go-microservices/gizmo-greeter/pkg/greetertransport"
 )
 
 func main() {
-	var cfg *service.Config
+	var cfg *greetertransport.Config
 	config.LoadJSONFile("./config.json", &cfg)
 
 	server.Init("gizmo-hello-world", cfg.Server)
 
-	err := server.Register(service.NewJSONService(cfg))
+	var service greeterservice.Service
+	{
+		service = greeterservice.GreeterService{}
+	}
+
+	var endpoints = greeterendpoint.MakeServerEndpoints(service)
+
+	err := server.Register(greetertransport.NewJSONService(cfg, endpoints))
 	if err != nil {
 		server.Log.Fatal("unable to register service: ", err)
 	}

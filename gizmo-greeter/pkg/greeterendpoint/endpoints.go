@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/NYTimes/gizmo/server"
+	"github.com/antklim/go-microservices/gizmo-greeter/pkg/greeterservice"
 )
 
 // Endpoints collects all of the endpoints that compose a greeter service.
@@ -13,9 +14,9 @@ type Endpoints struct {
 }
 
 // MakeServerEndpoints returns service Endoints
-func MakeServerEndpoints() Endpoints {
-	healthEndpoint := MakeHealthEndpoint()
-	greetingEndpoint := MakeGreetingEndpoint()
+func MakeServerEndpoints(s greeterservice.Service) Endpoints {
+	healthEndpoint := MakeHealthEndpoint(s)
+	greetingEndpoint := MakeGreetingEndpoint(s)
 
 	return Endpoints{
 		HealthEndpoint:   healthEndpoint,
@@ -24,19 +25,18 @@ func MakeServerEndpoints() Endpoints {
 }
 
 // MakeHealthEndpoint constructs a Health endpoint.
-func MakeHealthEndpoint() server.JSONEndpoint {
+func MakeHealthEndpoint(s greeterservice.Service) server.JSONEndpoint {
 	return func(r *http.Request) (int, interface{}, error) {
-		// TODO - add real service call to get health state
-		healthy := true
+		healthy := s.Health()
 		return http.StatusOK, HealthResponse{Healthy: healthy}, nil
 	}
 }
 
 // MakeGreetingEndpoint constructs a Greeting endpoint.
-func MakeGreetingEndpoint() server.JSONEndpoint {
+func MakeGreetingEndpoint(s greeterservice.Service) server.JSONEndpoint {
 	return func(r *http.Request) (int, interface{}, error) {
-		// TODO - add real service call to get greeting
-		greeting := "Gizmo Hello!!!"
+		// TODO - get name parameter from the request query
+		greeting := s.Greeting("BOB")
 		return http.StatusOK, GreetingResponse{Greeting: greeting}, nil
 	}
 }

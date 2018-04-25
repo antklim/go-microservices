@@ -14,7 +14,9 @@ import (
 type (
 	// JSONService will implement server.JSONService and
 	// handle all requests to the server.
-	JSONService struct{}
+	JSONService struct {
+		Endpoints greeterendpoint.Endpoints
+	}
 
 	// Config is a struct to contain all the needed
 	// configuration for our JSONService.
@@ -23,18 +25,14 @@ type (
 	}
 )
 
-////////////////
-
-var endpoints = greeterendpoint.MakeServerEndpoints()
-
 // Prefix returns the string prefix used for all endpoints within this service.
 func (s *JSONService) Prefix() string {
 	return ""
 }
 
 // NewJSONService will instantiate a JSONService with the given configuration.
-func NewJSONService(cfg *Config) *JSONService {
-	return &JSONService{}
+func NewJSONService(cfg *Config, endpoints greeterendpoint.Endpoints) *JSONService {
+	return &JSONService{Endpoints: endpoints}
 }
 
 // Middleware provides an http.Handler hook wrapped around all requests.
@@ -67,10 +65,10 @@ func (s *JSONService) JSONMiddleware(j server.JSONEndpoint) server.JSONEndpoint 
 func (s *JSONService) JSONEndpoints() map[string]map[string]server.JSONEndpoint {
 	return map[string]map[string]server.JSONEndpoint{
 		"/health": map[string]server.JSONEndpoint{
-			"GET": endpoints.HealthEndpoint,
+			"GET": s.Endpoints.HealthEndpoint,
 		},
 		"/greeting": map[string]server.JSONEndpoint{
-			"GET": endpoints.GreetingEndpoint,
+			"GET": s.Endpoints.GreetingEndpoint,
 		},
 	}
 }
