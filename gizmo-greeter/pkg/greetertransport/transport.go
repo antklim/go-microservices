@@ -6,7 +6,8 @@ import (
 	"errors"
 	"net/http"
 
-	"../../../../gizmo/server"
+	server "../../../../gizmo/server"
+	endpoints "../greeterendpoint"
 	"github.com/NYTimes/gziphandler"
 	"github.com/sirupsen/logrus"
 )
@@ -24,6 +25,8 @@ type (
 )
 
 ////////////////
+
+var ep = endpoints.MakeServerEndpoints()
 
 // Prefix returns the string prefix used for all endpoints within this service.
 func (s *JSONService) Prefix() string {
@@ -65,44 +68,10 @@ func (s *JSONService) JSONMiddleware(j server.JSONEndpoint) server.JSONEndpoint 
 func (s *JSONService) JSONEndpoints() map[string]map[string]server.JSONEndpoint {
 	return map[string]map[string]server.JSONEndpoint{
 		"/health": map[string]server.JSONEndpoint{
-			"GET": s.Health,
+			"GET": ep.HealthEndpoint,
 		},
 		"/greeting": map[string]server.JSONEndpoint{
-			"GET": s.Greeting,
+			"GET": ep.GreetingEndpoint,
 		},
 	}
-}
-
-// Health endpoint.
-func (s *JSONService) Health(r *http.Request) (int, interface{}, error) {
-	// healthy := service.Health() should call real service instance
-	return http.StatusOK, HealthResponse{Healthy: true}, nil
-}
-
-// Greeting endpoint.
-func (s *JSONService) Greeting(r *http.Request) (int, interface{}, error) {
-	greeting := "Gizmo Hello!!!"
-	return http.StatusOK, GreetingResponse{Greeting: greeting}, nil
-}
-
-//////////////
-
-// HealthRequest collects the request parameters for the Health method.
-type HealthRequest struct{}
-
-// HealthResponse collects the response values for the Health method.
-type HealthResponse struct {
-	Healthy bool  `json:"healthy,omitempty"`
-	Err     error `json:"err,omitempty"`
-}
-
-// GreetingRequest collects the request parameters for the Greeting method.
-type GreetingRequest struct {
-	Name string `json:"name,omitempty"`
-}
-
-// GreetingResponse collects the response values for the Greeting method.
-type GreetingResponse struct {
-	Greeting string `json:"greeting,omitempty"`
-	Err      error  `json:"err,omitempty"`
 }
