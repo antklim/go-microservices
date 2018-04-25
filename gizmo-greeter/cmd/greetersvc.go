@@ -1,9 +1,9 @@
 package main
 
 import (
-	server "../../../gizmo/server"
 	service "../pkg/greetertransport"
 	"github.com/NYTimes/gizmo/config"
+	"github.com/NYTimes/gizmo/server"
 )
 
 func main() {

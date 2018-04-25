@@ -3,7 +3,7 @@ package greeterendpoint
 import (
 	"net/http"
 
-	server "../../../../gizmo/server"
+	"github.com/NYTimes/gizmo/server"
 )
 
 // Endpoints collects all of the endpoints that compose a greeter service.

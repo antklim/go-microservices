@@ -1,12 +1,11 @@
 package greetertransport
 
 import (
-	// "github.com/NYTimes/gizmo/server"
+	"github.com/NYTimes/gizmo/server"
 
 	"errors"
 	"net/http"
 
-	server "../../../../gizmo/server"
 	endpoints "../greeterendpoint"
 	"github.com/NYTimes/gziphandler"
 	"github.com/sirupsen/logrus"
