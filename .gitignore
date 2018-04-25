@@ -15,3 +15,5 @@
 
 # PID files
 *.pid
+
+*.log
