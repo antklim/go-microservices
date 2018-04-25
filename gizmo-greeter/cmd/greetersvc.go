@@ -12,7 +12,7 @@ func main() {
 	var cfg *greetertransport.Config
 	config.LoadJSONFile("./config.json", &cfg)
 
-	server.Init("gizmo-hello-world", cfg.Server)
+	server.Init("gizmo-greeter", cfg.Server)
 
 	var service greeterservice.Service
 	{
