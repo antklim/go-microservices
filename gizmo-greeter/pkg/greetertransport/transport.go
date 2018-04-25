@@ -6,8 +6,8 @@ import (
 	"errors"
 	"net/http"
 
-	endpoints "../greeterendpoint"
 	"github.com/NYTimes/gziphandler"
+	"github.com/antklim/go-microservices/gizmo-greeter/pkg/greeterendpoint"
 	"github.com/sirupsen/logrus"
 )
 
@@ -25,7 +25,7 @@ type (
 
 ////////////////
 
-var ep = endpoints.MakeServerEndpoints()
+var endpoints = greeterendpoint.MakeServerEndpoints()
 
 // Prefix returns the string prefix used for all endpoints within this service.
 func (s *JSONService) Prefix() string {
@@ -67,10 +67,10 @@ func (s *JSONService) JSONMiddleware(j server.JSONEndpoint) server.JSONEndpoint 
 func (s *JSONService) JSONEndpoints() map[string]map[string]server.JSONEndpoint {
 	return map[string]map[string]server.JSONEndpoint{
 		"/health": map[string]server.JSONEndpoint{
-			"GET": ep.HealthEndpoint,
+			"GET": endpoints.HealthEndpoint,
 		},
 		"/greeting": map[string]server.JSONEndpoint{
-			"GET": ep.GreetingEndpoint,
+			"GET": endpoints.GreetingEndpoint,
 		},
 	}
 }
