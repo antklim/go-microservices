@@ -129,7 +129,7 @@ func _Greeter_Greeting_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-var _Greeter_serviceDesc = grpc.ServiceDesc{
+var Greeter_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "pb.Greeter",
 	HandlerType: (*GreeterServer)(nil),
 	Methods: []grpc.MethodDesc{
