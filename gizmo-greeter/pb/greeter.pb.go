@@ -108,7 +108,7 @@ type GreeterServer interface {
 }
 
 func RegisterGreeterServer(s *grpc.Server, srv GreeterServer) {
-	s.RegisterService(&_Greeter_serviceDesc, srv)
+	s.RegisterService(&Greeter_serviceDesc, srv)
 }
 
 func _Greeter_Greeting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
