@@ -21,7 +21,7 @@ func main() {
 
 	var endpoints = greeterendpoint.MakeServerEndpoints(service)
 
-	err := server.Register(greetertransport.NewJSONService(cfg, endpoints))
+	err := server.Register(greetertransport.NewTService(cfg, endpoints))
 	if err != nil {
 		server.Log.Fatal("unable to register service: ", err)
 	}
