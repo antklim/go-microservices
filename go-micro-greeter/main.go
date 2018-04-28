@@ -19,7 +19,7 @@ func (g *Greeter) Greeting(ctx context.Context, in *pb.GreetingRequest, out *pb.
 
 func main() {
 	service := micro.NewService(
-		micro.Name("go.micro.srv.greeter"),
+		micro.Name("go-micro-srv-greeter"),
 		micro.Version("latest"),
 	)
 
