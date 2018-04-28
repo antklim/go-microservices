@@ -11,10 +11,10 @@ import (
 	"text/tabwriter"
 
 	"github.com/antklim/go-microservices/go-kit-greeter/pb"
-	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greetersd"
 	"google.golang.org/grpc"
 
 	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greeterendpoint"
+	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greetersd"
 	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greeterservice"
 	"github.com/antklim/go-microservices/go-kit-greeter/pkg/greetertransport"
 
@@ -76,8 +76,7 @@ func main() {
 		g.Add(func() error {
 			logger.Log("transport", "HTTP", "addr", *httpAddr, "port", *httpPort)
 			registar.Register()
-			handler := httpHandler
-			return http.ListenAndServe(":"+*httpPort, handler)
+			return http.ListenAndServe(":"+*httpPort, httpHandler)
 		}, func(error) {
 			registar.Deregister()
 		})
