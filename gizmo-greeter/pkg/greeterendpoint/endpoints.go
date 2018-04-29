@@ -37,9 +37,12 @@ func MakeHealthEndpoint(s greeterservice.Service) server.JSONContextEndpoint {
 // MakeGreetingEndpoint constructs a Greeting endpoint.
 func MakeGreetingEndpoint(s greeterservice.Service) server.JSONContextEndpoint {
 	return func(ctx ocontext.Context, r *http.Request) (int, interface{}, error) {
-		// TODO - get name parameter from the request query
-		greeting := s.Greeting("BOB")
-		return http.StatusOK, GreetingResponse{Greeting: greeting}, nil
+		vars := r.URL.Query()
+		names, exists := vars["name"]
+		if !exists || len(names) != 1 {
+			return http.StatusBadRequest, errorResponse{Error: "query parameter 'name' required"}, nil
+		}
+		return http.StatusOK, GreetingResponse{Greeting: names[0]}, nil
 	}
 }
 
@@ -59,4 +62,8 @@ type GreetingRequest struct {
 // GreetingResponse collects the response values for the Greeting method.
 type GreetingResponse struct {
 	Greeting string `json:"greeting,omitempty"`
+}
+
+type errorResponse struct {
+	Error string `json:"error"`
 }
