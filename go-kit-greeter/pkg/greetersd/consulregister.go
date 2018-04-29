@@ -55,7 +55,7 @@ func ConsulRegister(consulAddress string,
 		Name:    "go-kit-srv-greeter",
 		Address: advertiseAddress,
 		Port:    port,
-		Tags:    []string{"greeter"},
+		Tags:    []string{"go-kit", "greeter"},
 		Check:   &check,
 	}
 	registar = consulsd.NewRegistrar(client, &asr, logger)
