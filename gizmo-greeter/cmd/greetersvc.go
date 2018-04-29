@@ -11,6 +11,7 @@ import (
 func main() {
 	var cfg *greetertransport.Config
 	config.LoadJSONFile("./config.json", &cfg)
+	server.SetConfigOverrides(cfg.Server)
 
 	server.Init("gizmo-greeter", cfg.Server)
 

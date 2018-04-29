@@ -1,6 +1,8 @@
 package greetertransport
 
 import (
+	"context"
+
 	"github.com/NYTimes/gizmo/server"
 	"google.golang.org/grpc"
 
@@ -58,10 +60,10 @@ func (s *TService) ContextMiddleware(h server.ContextHandler) server.ContextHand
 // JSONMiddleware provides a JSONEndpoint hook wrapped around all requests.
 // In this implementation, we're using it to provide application logging and to check errors
 // and provide generic responses.
-func (s *TService) JSONMiddleware(j server.JSONEndpoint) server.JSONEndpoint {
-	return func(r *http.Request) (int, interface{}, error) {
+func (s *TService) JSONMiddleware(j server.JSONContextEndpoint) server.JSONContextEndpoint {
+	return func(ctx context.Context, r *http.Request) (int, interface{}, error) {
 
-		status, res, err := j(r)
+		status, res, err := j(ctx, r)
 		if err != nil {
 			server.LogWithFields(r).WithFields(logrus.Fields{
 				"error": err,
