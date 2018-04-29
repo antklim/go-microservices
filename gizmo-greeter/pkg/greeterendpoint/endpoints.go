@@ -42,7 +42,8 @@ func MakeGreetingEndpoint(s greeterservice.Service) server.JSONContextEndpoint {
 		if !exists || len(names) != 1 {
 			return http.StatusBadRequest, errorResponse{Error: "query parameter 'name' required"}, nil
 		}
-		return http.StatusOK, GreetingResponse{Greeting: names[0]}, nil
+		greeting := s.Greeting(names[0])
+		return http.StatusOK, GreetingResponse{Greeting: greeting}, nil
 	}
 }
 
