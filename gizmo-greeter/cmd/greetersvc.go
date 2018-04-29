@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 
 	"github.com/NYTimes/gizmo/config"
 	"github.com/NYTimes/gizmo/server"
 	"github.com/antklim/go-microservices/gizmo-greeter/pkg/greeterendpoint"
+	"github.com/antklim/go-microservices/gizmo-greeter/pkg/greetersd"
 	"github.com/antklim/go-microservices/gizmo-greeter/pkg/greeterservice"
 	"github.com/antklim/go-microservices/gizmo-greeter/pkg/greetertransport"
 	"github.com/oklog/oklog/pkg/group"
@@ -21,8 +23,11 @@ func main() {
 
 	server.Init("gizmo-greeter", cfg.Server)
 
-	var service = greeterservice.GreeterService{}
-	var endpoints = greeterendpoint.MakeServerEndpoints(service)
+	var (
+		service   = greeterservice.GreeterService{}
+		endpoints = greeterendpoint.MakeServerEndpoints(service)
+		registar  = greetersd.ConsulRegister("", "8500", "", strconv.Itoa(cfg.Server.HTTPPort))
+	)
 
 	var g group.Group
 	{
@@ -33,8 +38,10 @@ func main() {
 		}
 
 		g.Add(func() error {
+			registar.Register()
 			return server.Run()
 		}, func(err error) {
+			registar.Deregister()
 			server.Log.Fatal("server encountered a fatal error: ", err)
 		})
 	}
