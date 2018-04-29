@@ -1,11 +1,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
+	"text/tabwriter"
 
 	"github.com/NYTimes/gizmo/config"
 	"github.com/NYTimes/gizmo/server"
@@ -17,16 +19,24 @@ import (
 )
 
 func main() {
+	fs := flag.NewFlagSet("greetersvc", flag.ExitOnError)
+	var (
+		configPath = fs.String("config.path", "./config.json", "Config file path")
+		consulAddr = fs.String("consul.addr", "", "Consul Address")
+		consulPort = fs.String("consul.port", "8500", "Consul Port")
+	)
+	fs.Usage = usageFor(fs, os.Args[0]+" [flags]")
+	fs.Parse(os.Args[1:])
+
 	var cfg *greetertransport.Config
-	config.LoadJSONFile("./config.json", &cfg)
-	server.SetConfigOverrides(cfg.Server)
+	config.LoadJSONFile(*configPath, &cfg)
 
 	server.Init("gizmo-greeter", cfg.Server)
 
 	var (
 		service   = greeterservice.GreeterService{}
 		endpoints = greeterendpoint.MakeServerEndpoints(service)
-		registar  = greetersd.ConsulRegister("", "8500", "", strconv.Itoa(cfg.Server.HTTPPort))
+		registar  = greetersd.ConsulRegister(*consulAddr, *consulPort, "", strconv.Itoa(cfg.Server.HTTPPort))
 	)
 
 	var g group.Group
@@ -62,4 +72,19 @@ func main() {
 		})
 	}
 	server.Log.Debug("exit", g.Run())
+}
+
+func usageFor(fs *flag.FlagSet, short string) func() {
+	return func() {
+		fmt.Fprintf(os.Stderr, "USAGE\n")
+		fmt.Fprintf(os.Stderr, "  %s\n", short)
+		fmt.Fprintf(os.Stderr, "\n")
+		fmt.Fprintf(os.Stderr, "FLAGS\n")
+		w := tabwriter.NewWriter(os.Stderr, 0, 2, 2, ' ', 0)
+		fs.VisitAll(func(f *flag.Flag) {
+			fmt.Fprintf(w, "\t-%s %s\t%s\n", f.Name, f.DefValue, f.Usage)
+		})
+		w.Flush()
+		fmt.Fprintf(os.Stderr, "\n")
+	}
 }
