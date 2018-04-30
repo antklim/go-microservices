@@ -1,7 +1,11 @@
 #!/usr/bin/env sh
 
-echo "Stopping go-micro-greeter"
-kill -9 `cat go-micro-greeter.pid`
+echo "Stopping go-micro-greeter-srv"
+kill -9 `cat go-micro-greeter-srv.pid`
+sleep 3
+
+echo "Stopping go-micro-greeter-web"
+kill -9 `cat go-micro-greeter-web.pid`
 sleep 3
 
 echo "Stopping go-kit-greeter"
